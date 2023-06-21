@@ -20,7 +20,7 @@ class RoundedPrimaryButton extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(50,20,50,20),
+          padding: const EdgeInsets.fromLTRB(40,20,40,20),
           child: Text(label, style: mediumText.copyWith(color: Colors.white)),
         ),
       ),
