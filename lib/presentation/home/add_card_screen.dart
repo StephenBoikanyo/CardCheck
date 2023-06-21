@@ -3,6 +3,8 @@ import 'package:card_check/presentation/utils/constants.dart';
 import 'package:card_check/presentation/widgets/widgets.dart';
 import 'package:card_check/services/services.dart';
 import 'package:intl/intl.dart';
+import 'package:credit_card_scanner/credit_card_scanner.dart';
+
 
 class AddCardScreen extends StatefulWidget {
   static const String id = 'AddCardScreen';
@@ -14,11 +16,13 @@ class _AddCardScreenState extends State<AddCardScreen> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _lastNameController = TextEditingController();
   TextEditingController _cardNumberController = TextEditingController();
+  TextEditingController _expiryDateController = TextEditingController();
+  TextEditingController _cvvController   = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {
-    final CountryList countryService = CountryList();
-
+    final cardUtils = CardUtils();
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -31,7 +35,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                Text(
+               const  Text(
                   'Add a new card',
                   style: largeText,
                 ),
@@ -59,23 +63,17 @@ class _AddCardScreenState extends State<AddCardScreen> {
                 const SizedBox(
                   height: 20,
                 ),
-
-
-
-
-
-
-
-                // Row(
-                //   children: [
-                //     Expanded(child: CustomTextField(fieldLabel: 'MM/YY')),
-                //     const SizedBox(width: 20,),
-                //     Expanded(child: CustomTextField(fieldLabel: 'CVV')),
-                //   ],
-                // ),
+                Row(
+                  children: [
+                    Expanded(child: CustomTextField(fieldLabel: 'MM/YY',fieldController: _expiryDateController,)),
+                    const SizedBox(width: 20,),
+                    Expanded(child: CustomTextField(fieldLabel: 'CVV',fieldController: _cvvController,)),
+                  ],
+                ),
                 const SizedBox(
                   height: 20,
                 ),
+
                 Row(
                   children: [
                     RoundedPrimaryButton(
@@ -109,14 +107,13 @@ class _AddCardScreenState extends State<AddCardScreen> {
                     ),
                     RoundedPrimaryButton(
                       label: 'Scan',
-                      onPressed: () async {
-                        List<Map<String, String>> storedData =
-                            await DataStorage.loadStoredData();
-                        print(storedData);
-                      },
+                      onPressed: () => cardUtils.scanCard(
+                          _cardNumberController,
+                          _expiryDateController)
+
                     )
                   ],
-                )
+                ),
               ],
             ),
           ),
