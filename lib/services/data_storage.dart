@@ -5,19 +5,19 @@ class DataStorage {
 
   static Future<List<Map<String, String>>> loadStoredData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? storedData = prefs.getStringList('storedData');
+   final List<String>? storedData = prefs.getStringList('storedData');
 
     if (storedData != null) {
       return storedData.map((String data) {
-        List<String> values = data.split(',');
+        final values = data.split(',');
         return {
           'name': values[0],
-          'lastName': values[1],
-          'cardNumber': values[2],
-          'provider': values[3],
-          'date' : values[4],
+          'cardNumber': values[1],
+          'provider': values[2],
+          'date' : values[3],
           'time' : values[5],
-
+          'expiryDate': values[6],
+          'cvv' : values[4],
         };
       }).toList();
     }
@@ -26,10 +26,10 @@ class DataStorage {
   }
 
   static Future<void> storeData(
-      String name, String lastName,  String cardNumber,String provider,String date, String time) async {
+      String name,String cardNumber,String provider,String date, String time,String expiryDate,String cvv ,) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    String newData = '$name,$lastName,$cardNumber,$provider,$date,$time';
+    String newData = '$name,$cardNumber,$provider,$date,$time,$expiryDate,$cvv';
 
     List<String>? storedData = prefs.getStringList('storedData');
     if (storedData != null) {
