@@ -3,7 +3,6 @@ import 'package:card_check/presentation/utils/constants.dart';
 import 'package:card_check/presentation/widgets/widgets.dart';
 import 'package:card_check/services/services.dart';
 import 'package:intl/intl.dart';
-import 'package:credit_card_scanner/credit_card_scanner.dart';
 
 
 class AddCardScreen extends StatefulWidget {
@@ -13,11 +12,75 @@ class AddCardScreen extends StatefulWidget {
 }
 
 class _AddCardScreenState extends State<AddCardScreen> {
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _lastNameController = TextEditingController();
-  TextEditingController _cardNumberController = TextEditingController();
-  TextEditingController _expiryDateController = TextEditingController();
-  TextEditingController _cvvController   = TextEditingController();
+  final  TextEditingController _nameController = TextEditingController();
+  final  TextEditingController _cardNumberController = TextEditingController();
+  final  TextEditingController _cvvController   = TextEditingController();
+  final  TextEditingController _expiryDateController = TextEditingController();
+
+  //Card Submission Logic
+  void _checkAndSaveCard() async {
+    final cardNumber = _cardNumberController.text;
+    final provider = CardUtils.getCardProvider(cardNumber);
+
+    if (!CardUtils.isValidCardLength(provider, cardNumber)) {
+      _showAlertDialog('Invalid Card Number', 'The entered card number is invalid.');
+      return;
+    }
+
+    final storedData = await DataStorage.loadStoredData();
+
+    if (storedData.any((data) => data['cardNumber'] == cardNumber)) {
+      _showAlertDialog('Card Already Added', 'The entered card has already been added.');
+      _clearFields();
+      return;
+    }
+
+    final date = DateFormat.yMMMd().format(DateTime.now());
+    final time = DateFormat.jm().format(DateTime.now());
+
+    DataStorage.storeData(
+      _nameController.text,
+      cardNumber,
+      provider,
+      date,
+      time,
+      _expiryDateController.text,
+      _cvvController.text,
+    );
+
+    _clearFields();
+
+    Navigator.pop(context);
+  }
+
+  void _showAlertDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            ElevatedButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _clearFields() {
+    _nameController.clear();
+    _cardNumberController.clear();
+    _cvvController.clear();
+    _expiryDateController.clear();
+  }
+
+
 
 
   @override
@@ -27,8 +90,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          automaticallyImplyLeading: true,
-          iconTheme: IconThemeData(color: Colors.black),
+          iconTheme: const IconThemeData(color: Colors.black),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -46,18 +108,12 @@ class _AddCardScreenState extends State<AddCardScreen> {
                   fieldLabel: 'Card holder name',
                   fieldController: _nameController,
                 ),
+
                 const SizedBox(
                   height: 20,
                 ),
                 CustomTextField(
-                  fieldLabel: 'Card holder last name',
-                  fieldController: _lastNameController,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                CustomTextField(
-                  fieldLabel: 'Card Number',
+                  fieldLabel: 'Card number',
                   fieldController: _cardNumberController,
                 ),
                 const SizedBox(
@@ -78,29 +134,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
                   children: [
                     RoundedPrimaryButton(
                       label: 'Submit',
-                      onPressed: () {
-                        String cardNumber = _cardNumberController.text;
-                        String provider = CardUtils.getCardProvider(cardNumber);
-                        if (CardUtils.isValidCardLength(provider, cardNumber)) {
-                          String date =
-                              DateFormat.yMMMd().format(DateTime.now());
-                          String? time = DateFormat.jm().format(DateTime.now());
-
-                          DataStorage.storeData(
-                              _nameController.text,
-                              _lastNameController.text,
-                              cardNumber,
-                              provider,
-                              date,
-                              time);
-                          _nameController.clear();
-                          _lastNameController.clear();
-                          _cardNumberController.clear();
-                        } else {
-                          // Show an error message or perform appropriate action
-                          print('Invalid card number length!');
-                        }
-                      },
+                      onPressed: _checkAndSaveCard
                     ),
                     const SizedBox(
                       width: 20,
