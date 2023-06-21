@@ -15,8 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
-  List<Map<String, String>> _storedData = [];
+  late Future<List<Map<String, String>>> _storedDataFuture;
 
   @override
   void initState() {
@@ -24,10 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadStoredData();
   }
 
-  void _loadStoredData() async {
-    List<Map<String, String>> storedData = await DataStorage.loadStoredData();
+  Future<void> _loadStoredData() async {
     setState(() {
-      _storedData = storedData;
+      _storedDataFuture = DataStorage.loadStoredData();
     });
   }
 
@@ -36,58 +34,164 @@ class _HomeScreenState extends State<HomeScreen> {
     var name = 'Naledi';
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(
-          color: Colors.black
-        ),
+        iconTheme: const IconThemeData(color: Colors.black),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       drawer: const Drawer(),
-      body: Column(
-        children: [
-          const SizedBox(height: 20,),
-          Expanded(
-              child: Column(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${greeting()}, $name!',style: largeText,),
-              const SizedBox(height: 10,),
-              Text('You have no registered cards in your wallet.',
-                style: smallText.copyWith(color: const Color(0xff4F4F4F)),),
+              FutureBuilder<List<Map<String, String>>>(
+                future: _storedDataFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return const Text('Error loading data');
+                  } else {
+                    final _storedData = snapshot.data ?? [];
 
-              Container(
-                height: 500,
-                child: ListView.builder(
-                  itemCount: _storedData.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ListTile(
-                      leading: CircleAvatar(
-                              backgroundColor: Color(0xffDF6B00),
-                          child: FaIcon(FontAwesomeIcons.ccAmex)),
-                      title: Text('Name: ${_storedData[index]['name']}'),
-                      subtitle: Text(
-                        'Last Name: ${_storedData[index]['lastName']}\nCard Number: ${_storedData[index]['cardNumber']}',
-                      ),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${greeting()}, $name!',
+                          style: largeText,
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        // A Card Carousel to view saved cards
+                        SizedBox(
+                          height: 205,
+                          width: 400,
+                          child: Center(
+                            child: PageView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _storedData.length,
+                              itemBuilder: (context, index) {
+                                final cardNumber =
+                                _storedData[index]['cardNumber'].toString();
+                                final cardHolder =
+                                    '${_storedData[index]['name']}';
+                                final expiryDate =
+                                _storedData[index]['expiryDate'].toString();
+
+                                return CardWidget(
+                                  cardNumber: cardNumber,
+                                  cardHolder: cardHolder,
+                                  expiryDate: expiryDate,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text('Swipe to view your cards', style: smallText.copyWith(fontSize: 10),textAlign: TextAlign.end,),
+                            const SizedBox(width: 10,),
+                            FaIcon(FontAwesomeIcons.rightLeft ,size: 10,)
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        const Text(
+                          'Registered Card Sessions',
+                          style: mediumText,
+                        ),
+                        Container(
+                          height: _storedData.isEmpty ? null : 300,
+                          child: _storedData.isEmpty
+                              ? const Center(
+                            child: Text(
+                              'There are currently no cards saved',
+                              style: largeText,
+                            ),
+                          )
+                              : ListView.builder(
+                            itemCount: _storedData.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: const Color(0xffDF6B00),
+                                  child: _storedData[index]['provider'] ==
+                                      'Mastercard'
+                                      ? FaIcon(FontAwesomeIcons.ccMastercard)
+                                      : _storedData[index]['provider'] ==
+                                      'Visa'
+                                      ? FaIcon(FontAwesomeIcons.ccVisa)
+                                      : _storedData[index]['provider'] ==
+                                      'Amex'
+                                      ? FaIcon(
+                                      FontAwesomeIcons.ccAmex)
+                                      : null,
+                                ),
+                                title: Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      '${_storedData[index]['cardNumber']}',
+                                      style: smallText,
+                                    ),
+                                  ],
+                                ),
+                                subtitle: Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Date: ${_storedData[index]['date']}',
+                                      style: smallText.copyWith(
+                                          color: Colors.green),
+                                    ),
+                                    Text(
+                                      'Time: ${_storedData[index]['time']}',
+                                      style: smallText.copyWith(
+                                          color: Colors.green),
+                                    )
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     );
-                  },
-                ),
+                  }
+                },
+              ),
+              const SizedBox(
+                height: 20,
               ),
 
-
-
-
-
-
-
-
-
+              const SizedBox(
+                height: 20,
+              ),
             ],
-          )),
-          RoundedPrimaryButton(label: 'Add a card',
-              onPressed: () => Navigator.pushNamed(context, AddCardScreen.id)),
-          const SizedBox(height: 20,),
-        ],
+          ),
+        ),
+      ),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.zero,
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child:  RoundedPrimaryButton(
+            label: 'Add a card',
+            onPressed: () {
+              Navigator.pushNamed(context, AddCardScreen.id).then((_) {
+                _loadStoredData();
+              });
+            },
+          ),
+        ),
       ),
     );
-
   }
 }
