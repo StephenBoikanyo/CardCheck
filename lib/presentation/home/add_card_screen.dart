@@ -16,6 +16,10 @@ class _AddCardScreenState extends State<AddCardScreen> {
   final  TextEditingController _cardNumberController = TextEditingController();
   final  TextEditingController _cvvController   = TextEditingController();
   final  TextEditingController _expiryDateController = TextEditingController();
+  String? selectedCountry ;
+  final countryList = CountryList();
+  final cardUtils = CardUtils();
+
 
   //Card Submission Logic
   void _checkAndSaveCard() async {
@@ -32,6 +36,12 @@ class _AddCardScreenState extends State<AddCardScreen> {
     if (storedData.any((data) => data['cardNumber'] == cardNumber)) {
       _showAlertDialog('Card Already Added', 'The entered card has already been added.');
       _clearFields();
+      return;
+    }
+
+    final selectedCountry = this.selectedCountry;
+    if (selectedCountry != null && countryList.bannedCountries.contains(selectedCountry)) {
+      _showAlertDialog('Banned Country', 'The country your card is issued in has been banned.');
       return;
     }
 
@@ -85,7 +95,6 @@ class _AddCardScreenState extends State<AddCardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cardUtils = CardUtils();
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -119,6 +128,27 @@ class _AddCardScreenState extends State<AddCardScreen> {
                 const SizedBox(
                   height: 20,
                 ),
+                const SizedBox(
+                  height: 20,
+                ),
+                DropdownButtonFormField<String>(
+                  value: selectedCountry,
+                  hint: Text('Select a country'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedCountry = newValue.toString();
+                    });
+                  },
+                  items: countryList.countries.toSet().map<DropdownMenuItem<String>>(
+                        (String country) {
+                      return DropdownMenuItem<String>(
+                        value: country,
+                        child: Text(country),
+                      );
+                    },
+                  ).toList()
+                ),
+                const SizedBox(height: 20,),
                 Row(
                   children: [
                     Expanded(child: CustomTextField(fieldLabel: 'MM/YY',fieldController: _expiryDateController,)),
