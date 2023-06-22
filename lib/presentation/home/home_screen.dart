@@ -1,4 +1,5 @@
 import 'package:card_check/presentation/home/add_card_screen.dart';
+import 'package:card_check/presentation/home/banned_countries.dart';
 import 'package:flutter/material.dart';
 import 'package:card_check/presentation/utils/constants.dart';
 import 'package:card_check/presentation/widgets/widgets.dart';
@@ -34,11 +35,16 @@ class _HomeScreenState extends State<HomeScreen> {
     var name = 'Naledi';
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16,top: 8),
+          child: InkWell(
+            onTap: () => Navigator.pushNamed(context, BannedCountriesScreen.id),
+              child: FaIcon(FontAwesomeIcons.gear,size: 20,)),
+        ),
         iconTheme: const IconThemeData(color: Colors.black),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      drawer: const Drawer(),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
@@ -93,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text('Swipe to view your cards', style: smallText.copyWith(fontSize: 10),textAlign: TextAlign.end,),
+                            Text('Swipe to view your saved cards', style: smallText.copyWith(fontSize: 10),textAlign: TextAlign.end,),
                             const SizedBox(width: 10,),
                             FaIcon(FontAwesomeIcons.rightLeft ,size: 10,)
                           ],
@@ -108,10 +114,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         Container(
                           height: _storedData.isEmpty ? null : 300,
                           child: _storedData.isEmpty
-                              ? const Center(
+                              ?  Center(
                             child: Text(
                               'There are currently no cards saved',
-                              style: largeText,
+                              style: mediumText.copyWith(color: Colors.red),
                             ),
                           )
                               : ListView.builder(
