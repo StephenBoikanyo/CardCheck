@@ -1,10 +1,9 @@
 import 'package:card_check/presentation/home/add_card_screen.dart';
 import 'package:card_check/presentation/home/banned_countries.dart';
-import 'package:flutter/material.dart';
 import 'package:card_check/presentation/utils/constants.dart';
 import 'package:card_check/presentation/widgets/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:card_check/services/services.dart';
+import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 
@@ -73,8 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         // A Card Carousel to view saved cards
                         SizedBox(
-                          height: 205,
-                          width: 400,
+                          height: 230,
+                          width: 500,
                           child: Center(
                             child: PageView.builder(
                               scrollDirection: Axis.horizontal,
@@ -87,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 final expiryDate =
                                 _storedData[index]['expiryDate'].toString();
 
-                                return CardWidget(
+                                return customcard(
                                   cardNumber: cardNumber,
                                   cardHolder: cardHolder,
                                   expiryDate: expiryDate,
