@@ -23,9 +23,6 @@ A RankGroup interview assignment.
    <img src="screenshots/5.png" width="200" height="350" />
 </p>
 
-<p align = "middle">
-   <img src="screenshots/Screenshot 2023-06-22 at 03.57.59.png" width="1000" height="500" />
-</p>
 
 ## Getting Started 🚀
 
