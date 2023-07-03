@@ -6,8 +6,11 @@
 
 Bootstrapped by the [Very Good CLI][very_good_cli_link] 🤖
 
-A RankGroup interview assignment
-
+A RankGroup interview assignment.
+### Capture card details menually and via scanning (Card Number, Expiry Date, CVV, Card Holder)
+### Infer card type /provider 
+### Capture card storing sessions, by date and time
+### 
 ---
 
 <p align="middle">
